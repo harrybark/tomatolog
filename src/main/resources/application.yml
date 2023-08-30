@@ -33,6 +33,7 @@ spring:
   sql:
     init:
       mode: always
+  # rest repositories 적용을 위한 설정
   data:
     rest:
       base-path: /api
