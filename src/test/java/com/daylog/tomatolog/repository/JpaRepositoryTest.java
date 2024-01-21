@@ -2,6 +2,7 @@ package com.daylog.tomatolog.repository;
 
 import com.daylog.tomatolog.config.JpaConfig;
 import com.daylog.tomatolog.domain.Article;
+import com.daylog.tomatolog.domain.UserAccount;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,15 @@ class JpaRepositoryTest {
     private final ArticleRepository articleRepository;
     private final ArticleCommentRepository articleCommentRepository;
 
+    private final UserAccountRepository userAccountRepository;
+
     public JpaRepositoryTest(@Autowired ArticleRepository articleRepository,
-                             @Autowired ArticleCommentRepository articleCommentRepository) {
+                             @Autowired ArticleCommentRepository articleCommentRepository,
+                             @Autowired UserAccountRepository userAccountRepository
+    ) {
         this.articleRepository = articleRepository;
         this.articleCommentRepository = articleCommentRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     @DisplayName(value = "JPA 연결이 정상적으로 되었는지 확인한다.")
@@ -43,17 +49,15 @@ class JpaRepositoryTest {
     @DisplayName(value = "Insert 동작 여부를 테스트한다.")
     @Test
     public void 등록확인() throws Exception {
-        // given
-        long preCnt = articleRepository.count();
+        long previousCount = articleRepository.count();
+        UserAccount userAccount = userAccountRepository.save(UserAccount.of("uno", "pw", null, null, null));
+        Article article = Article.of(userAccount, "new article", "new content",  "#spring");
 
-        Article article = Article.of("new article", "new content", "spring");
-        // when
-        Article savedArticle = articleRepository.save(article);
+        // When
+        articleRepository.save(article);
 
-        long articles = articleRepository.count();
-
-        // then
-        assertThat(articles).isEqualTo(preCnt + 1);
+        // Then
+        assertThat(articleRepository.count()).isEqualTo(previousCount + 1);
 
     }
 
