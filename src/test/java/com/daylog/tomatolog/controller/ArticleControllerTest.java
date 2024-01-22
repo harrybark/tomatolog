@@ -33,7 +33,8 @@ class ArticleControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
                 .andExpect(view().name("articles/index"))
-                .andExpect(model().attributeExists("articles"));
+                .andExpect(model().attributeExists("articles"))
+        ;
     }
 
     //@Disabled("구현 중")
