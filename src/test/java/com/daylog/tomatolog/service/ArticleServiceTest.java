@@ -7,6 +7,7 @@ import com.daylog.tomatolog.dto.ArticleDto;
 import com.daylog.tomatolog.dto.ArticleWithCommentsDto;
 import com.daylog.tomatolog.dto.UserAccountDto;
 import com.daylog.tomatolog.repository.ArticleRepository;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,14 +66,14 @@ class ArticleServiceTest {
         SearchType searchType = SearchType.TITLE;
         String searchKeyword = "title";
         Pageable pageable = Pageable.ofSize(20);
-        given(articleRepository.findByTitle(searchKeyword, pageable)).willReturn(Page.empty());
+        given(articleRepository.findByTitleContaining(searchKeyword, pageable)).willReturn(Page.empty());
 
         // When
         Page<ArticleDto> articles = sut.searchArticles(searchType, searchKeyword, pageable);
 
         // Then
         assertThat(articles).isEmpty();
-        then(articleRepository).should().findByTitle(searchKeyword, pageable);
+        then(articleRepository).should().findByTitleContaining(searchKeyword, pageable);
     }
 
     @DisplayName("게시글을 조회하면, 게시글을 반환한다.")
@@ -115,7 +116,6 @@ class ArticleServiceTest {
     @Test
     void givenArticleInfo_whenSavingArticle_thenSavesArticle() {
         // Given
-        given(articleRepository.save(any(Article.class))).willReturn(null);
         ArticleDto dto = createArticleDto();
         given(articleRepository.save(any(Article.class))).willReturn(createArticle());
 
@@ -130,7 +130,6 @@ class ArticleServiceTest {
     @Test
     void givenModifiedArticleInfo_whenUpdatingArticle_thenUpdatesArticle() {
         // Given
-        given(articleRepository.save(any(Article.class))).willReturn(null);
         Article article = createArticle();
         ArticleDto dto = createArticleDto("새 타이틀", "새 내용", "#springboot");
         given(articleRepository.getReferenceById(dto.id())).willReturn(article);
@@ -139,7 +138,6 @@ class ArticleServiceTest {
         sut.updateArticle(dto);
 
         // Then
-        then(articleRepository).should().save(any(Article.class));
         assertThat(article)
                 .hasFieldOrPropertyWithValue("title", dto.title())
                 .hasFieldOrPropertyWithValue("content", dto.content())
@@ -165,7 +163,6 @@ class ArticleServiceTest {
     @Test
     void givenArticleId_whenDeletingArticle_thenDeletesArticle() {
         // Given
-        willDoNothing().given(articleRepository).delete(any(Article.class));
         Long articleId = 1L;
         willDoNothing().given(articleRepository).deleteById(articleId);
 
@@ -173,7 +170,6 @@ class ArticleServiceTest {
         sut.deleteArticle(1L);
 
         // Then
-        then(articleRepository).should().delete(any(Article.class));
         then(articleRepository).should().deleteById(articleId);
     }
 
