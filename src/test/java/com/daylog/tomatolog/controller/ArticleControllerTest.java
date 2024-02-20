@@ -113,6 +113,7 @@ class ArticleControllerTest {
                 .andExpect(model().attributeExists("articles/search-hashtag"));
     }
 
+
     private ArticleWithCommentsDto createArticleWithCommentsDto() {
         return ArticleWithCommentsDto.of(
                 1L,
