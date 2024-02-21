@@ -1,6 +1,7 @@
 package com.daylog.tomatolog.controller;
 
 import com.daylog.tomatolog.config.TestSecurityConfig;
+import com.daylog.tomatolog.domain.type.SearchType;
 import com.daylog.tomatolog.dto.ArticleWithCommentsDto;
 import com.daylog.tomatolog.dto.UserAccountDto;
 import com.daylog.tomatolog.service.ArticleService;
@@ -67,6 +68,38 @@ class ArticleControllerTest {
         then(articleService).should().searchArticles(
                 eq(null), eq(null), any(Pageable.class))
                 ;
+        then(paginationService).should().getPaginationBarNumbers(
+                anyInt(), anyInt()
+        );
+    }
+
+    @DisplayName("[view][GET] 게시글 리스트 (게시판) 페이지 - 검색어와 함께 정상호출")
+    @Test
+    public void 게시글_리스트_검색추가_정상호출() throws Exception {
+
+        // given
+        SearchType searchType = SearchType.TITLE;
+        String searchValue = "title";
+
+        given(articleService.searchArticles(
+                eq(searchType), eq(searchValue), any(Pageable.class)))
+                .willReturn(Page.empty());
+
+        given(paginationService.getPaginationBarNumbers(anyInt(), anyInt())).willReturn(List.of(0, 1, 2, 3, 4));
+        // when &  then
+        mockMvc.perform(get("/articles")
+                        .queryParam("searchType", searchType.name())
+                        .queryParam("searchValue", searchValue)
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().contentTypeCompatibleWith(TEXT_HTML))
+                .andExpect(view().name("articles/index"))
+                .andExpect(model().attributeExists("articles"))
+                .andExpect(model().attributeExists("searchTypes"))
+        ;
+        then(articleService).should().searchArticles(
+                eq(searchType), eq(searchValue), any(Pageable.class))
+        ;
         then(paginationService).should().getPaginationBarNumbers(
                 anyInt(), anyInt()
         );
